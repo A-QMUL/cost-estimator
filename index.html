@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cost Estimator - Software Project Cost Estimation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="mark">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <rect x="1.5" y="1.5" width="19" height="19" rx="3" stroke="#142136" stroke-width="1.6"/>
+          <path d="M5 14.5 L9 9 L12.5 12 L17 5.5" stroke="#2A4FD6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="17" cy="5.5" r="1.6" fill="#C2562B"/>
+        </svg>
+        Cost Estimator
+      </span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Turn a project's <em>size</em> into a defensible <em>cost</em>.</h1>
+    <p>Enter a project's scale or upload its component list. Cost Estimator applies two industry-standard models, COCOMO and Function Point Analysis, and shows not just the headline effort but the contingency a realistic plan should carry.</p>
+    <div class="switch hero-switch" role="tablist" aria-label="Estimation method">
+      <button role="tab" id="tab-cocomo" aria-selected="true" aria-controls="panel-cocomo">COCOMO</button>
+      <button role="tab" id="tab-fpa" aria-selected="false" aria-controls="panel-fpa">Function Points</button>
+    </div>
+  </section>
+
+  <main>
+    <!-- COCOMO -->
+    <section class="panel active" id="panel-cocomo" role="tabpanel" aria-labelledby="tab-cocomo">
+      <div class="grid">
+        <div class="card">
+          <div class="card-head"><h2>Project inputs</h2><span class="n">MODEL / COCOMO-81</span></div>
+          <div class="card-body">
+            <label class="field">
+              <span class="lab">Estimated size <span class="hint">&mdash; thousands of lines of code (KLOC)</span></span>
+              <input type="number" id="kloc" value="32" min="0" step="1">
+            </label>
+            <label class="field">
+              <span class="lab">Project type <span class="hint">&mdash; sets the model coefficients</span></span>
+              <select id="ptype">
+                <option value="organic" selected>Organic &mdash; small, settled team</option>
+                <option value="semi">Semi-detached &mdash; mixed experience</option>
+                <option value="embedded">Embedded &mdash; tight constraints</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="lab">Contingency <span class="hint">&mdash; buffer for the unknown</span></span>
+              <div class="row2">
+                <input type="number" id="cont" value="20" min="0" max="100" step="5">
+                <select id="contnote" aria-label="Contingency rationale">
+                  <option value="20">% &mdash; typical</option>
+                </select>
+              </div>
+            </label>
+            <p class="note">A plan with no contingency is a plan set up to fail. The buffer is shown separately so it is never silently dropped.</p>
+          </div>
+        </div>
+
+        <div>
+          <div class="readout">
+            <div class="ro-lab">Estimated effort</div>
+            <div class="ro-big"><span id="co-effort">0</span> <span class="ro-unit">person-months</span></div>
+            <div class="ro-sub">
+              <div><div class="k">Schedule</div><div class="v"><span id="co-time">0</span> mo</div></div>
+              <div><div class="k">Avg. staff</div><div class="v" id="co-staff">0</div></div>
+              <div><div class="k">Per-month cost*</div><div class="v">&pound;<span id="co-cost">0</span></div></div>
+            </div>
+            <div class="band">
+              <div class="blab"><span class="t">Base + contingency</span><span class="t">Planned: <b id="co-total">0</b> pm</span></div>
+              <div class="track"><div class="base" id="co-basebar" style="width:80%"><span id="co-baselab">0</span></div><div class="buf" id="co-bufbar" style="width:20%"></div></div>
+              <div class="cap">Recommended plan carries <b id="co-bufval">0</b> person-months of contingency on top of the base estimate.</div>
+            </div>
+          </div>
+          <p class="note" style="border-color:var(--paper-line)">*Cost assumes a notional &pound;6,000 per person-month. Adjust the rate in your own planning; the model estimates effort, not price.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FPA -->
+    <section class="panel" id="panel-fpa" role="tabpanel" aria-labelledby="tab-fpa">
+      <div class="grid">
+        <div class="card">
+          <div class="card-head"><h2>Functional components</h2><span class="n">MODEL / IFPUG-FPA</span></div>
+          <div class="card-body">
+            <label class="drop" id="drop">
+              <input type="file" id="csv" accept=".csv,text/csv">
+              <div>Drop a <strong>components CSV</strong> here, or click to choose</div>
+              <div class="sm">Columns: Component, Type, Count, Weight</div>
+            </label>
+            <button class="sample" id="loadsample">&darr; Load the sample library-system data</button>
+            <table id="fptable" aria-label="Function point components">
+              <thead><tr><th>Component</th><th>Type</th><th class="num">Count</th><th class="num">Weight</th><th class="num">FP</th></tr></thead>
+              <tbody id="fpbody"></tbody>
+              <tfoot><tr><td colspan="4">Unadjusted function points (UFP)</td><td class="num" id="ufp">0</td></tr></tfoot>
+            </table>
+            <label class="field" style="margin-top:18px">
+              <span class="lab">Value Adjustment Factor (VAF) <span class="hint">&mdash; 0.65 to 1.35</span></span>
+              <input type="number" id="vaf" value="1.08" min="0.65" max="1.35" step="0.01">
+            </label>
+            <label class="field">
+              <span class="lab">Productivity <span class="hint">&mdash; function points per person-month</span></span>
+              <input type="number" id="prod" value="8" min="0.1" step="0.1">
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <div class="readout">
+            <div class="ro-lab">Estimated effort</div>
+            <div class="ro-big"><span id="fp-effort">0</span> <span class="ro-unit">person-months</span></div>
+            <div class="ro-sub">
+              <div><div class="k">Unadjusted FP</div><div class="v" id="fp-ufp">0</div></div>
+              <div><div class="k">Adjusted FP</div><div class="v" id="fp-afp">0</div></div>
+              <div><div class="k">Per-month cost*</div><div class="v">&pound;<span id="fp-cost">0</span></div></div>
+            </div>
+            <div class="chart" id="fpchart" aria-label="Function points by component"></div>
+          </div>
+          <p class="note">Adjusted FP = UFP &times; VAF. Effort = Adjusted FP &divide; productivity. The chart shows which component types drive the size, so scope conversations focus on what matters.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
