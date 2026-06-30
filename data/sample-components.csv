@@ -1,0 +1,12 @@
+Component,Type,Count,Weight
+Member login,External Inputs,6,4
+Add/edit book record,External Inputs,5,4
+Place reservation,External Inputs,4,4
+Overdue notice,External Outputs,5,5
+Loan history report,External Outputs,4,5
+Catalogue search,External Inquiries,7,4
+Availability check,External Inquiries,5,4
+Book catalogue,Internal Logical Files,6,10
+Member records,Internal Logical Files,4,10
+Payment gateway,External Interface Files,3,7
+Council ID service,External Interface Files,2,7
